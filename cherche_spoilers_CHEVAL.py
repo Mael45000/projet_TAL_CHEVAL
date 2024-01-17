@@ -4,22 +4,21 @@ import operator
 import re
 nlp = spacy.load("en_core_web_sm")
 
-fichier_mot=open("mots_en_commun_.csv","w",encoding="UTF-8")
-fichier_mot.write("postText"+"	"+"phrase(s)"+"	"+"spoiler"+"\n")
+fichier_mot=open("mots_en_commun_sansmulti.csv","w",encoding="UTF-8")
+fichier_mot.write("postText"+"µ"+"phrase(s)"+"µ"+"spoiler"+"µ"+"tags"+"\n")
 with open("validation.jsonl", encoding="UTF-8") as mon_fichier:
-    # Initialiser une liste pour stocker les clés "postText" et "targetParagraphs"
     postText_and_targetParagraphs = [] 
-    # Lire chaque ligne du fichier
     for ligne in mon_fichier:
         # Charger l'objet JSON à partir de la ligne
         objet_json = json.loads(ligne)
-        # Vérifier si les clés "postText" et "targetParagraphs" existent
         if "postText" in objet_json and "targetParagraphs" in objet_json and "spoiler" in objet_json:
             # Ajouter les valeurs de ces clés à la liste
-            postText_and_targetParagraphs.append({
-                "targetParagraphs": objet_json["targetParagraphs"],
-                "postText": objet_json["postText"],
-                "spoiler" : objet_json["spoiler"]
+            if "tags"!="multi":
+                postText_and_targetParagraphs.append({
+                    "targetParagraphs": objet_json["targetParagraphs"],
+                    "postText": objet_json["postText"],
+                    "spoiler" : objet_json["spoiler"],
+                    "tags":objet_json["tags"]#ajout de la clé "tags" pour mesurer la performance du script
             })
 
 #normalisation des mots 
@@ -32,15 +31,16 @@ def norm(u):
             l.append(tok.lemma_)
     return(l)
 
-cpt=0
-l_adv=["when","how much","how many","where","why","who"]
+l_adv=["when","how much","how many","where","why","who"]#liste les adverbes qui vont servir d'indices synaxiques
 for i in postText_and_targetParagraphs:
-    cpt=cpt+1
     texte_norm=norm(i["postText"][0])
-    txt=i["postText"][0]
+    txt=i["postText"][0] 
+    if "\n" in txt: #evite des soucis d'affichage dans le fichier, quand des retours à la ligne sont dans titre
+        txt=txt.replace("\n"," ")
     doc_txt=nlp(txt)
     corps=i["targetParagraphs"]
     spoiler=i["spoiler"]
+    tags=i["tags"]
     comparateur={}
     for partie in corps:
         doc=nlp(partie)
@@ -51,8 +51,8 @@ for i in postText_and_targetParagraphs:
                 for w in corps_norm:
                     if mot==w:
                         c=c+1
-                        comparateur[sent]=c #compte le nombre de mots en commun avec le texte
-                        break #quand on trouve le mot dans le texte, on passe au suivant, ca permet de ne pas prendre le mot plusieurs fois
+                        comparateur[sent]=c #compte le nombre de mots en commun avec PostText
+                        break #quand on trouve le mot dans le texte, on passe au suivant, cela permet de ne pas prendre le mot plusieurs fois
   
     if comparateur:
         #liste_p=[]
@@ -87,18 +87,15 @@ for i in postText_and_targetParagraphs:
                             liste_verif.append("0")
                 else:
                     liste_verif.append("0")
-                    #Par soucis de temps, tous les adverbes n'ont pas pu être réalisés        
-                            
-        if "1" not in liste_verif:
-            print("rien")
-            fichier_mot.write(txt+"	"+str(l_mot_egal)+"	"+spoiler[0]+"\n")
+                    #Par soucis de temps, tous les adverbes n'ont pas pu être réalisés
+                    
+        if "1" not in liste_verif: 
+            fichier_mot.write(txt+"µ"+str(l_mot_egal)+"µ"+str(spoiler)+"µ"+str(tags)+"\n")
         else:
-            l_mot_modif=[]
+            l_mot_modif=[]#stocke les phrases ayant un indice syntaxique
             l_mot_modif = l_mot_modif = [x for i, x in enumerate(l_mot_egal) if i < len(liste_verif) and liste_verif[i] == "1"]
-            fichier_mot.write(txt+"	"+str(l_mot_modif)+"	"+spoiler[0]+"\n")
-            print("APRES",l_mot_modif)
-    
-    else: #garder les phrases uniques et les inserer dans le fichier csv
+            fichier_mot.write(txt+"µ"+str(l_mot_modif)+"µ"+str(spoiler)+"µ"+str(tags)+"\n")
+    else: #garder les listes de phrases uniques et les inserer dans le fichier .csv
+        fichier_mot.write(txt+"µ"+str(l_mot_egal)+"µ"+str(spoiler)+"µ"+str(tags)+"\n")
         print("ok")
-        fichier_mot.write(txt+"	"+str(l_mot_egal)+"	"+spoiler[0]+"\n")
 fichier_mot.close()
