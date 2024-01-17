@@ -2,7 +2,7 @@
 ## cherche_spoilers_CHEVAL.py
 Correspond au code python du projet.
 Pour que le fichier fonctionne correctement, veillez à :
-- [ ] Télécharger et importer *validation.json*.
+- [ ] Télécharger et importer le jeu de données *validation.json*.
 - [ ] Télécharger toutes les bibiliothèques nécessaires.
 
 ## mot_en_commun.csv
