@@ -2,7 +2,7 @@
 ## cherche_spoilers_CHEVAL.py
 Correspond au code python du projet.
 Pour que le fichier fonctionne correctement, veillez à :
-- [ ] Télécharger et importer le jeu de données "validation.jsonl" de la campagne Semeval 2023 task 5 : "clickbait spoiling", disponible à cette adresse: https://zenodo.org/records/6362726#.YsbdSTVBzrk
+- [ ] Télécharger et importer le jeu de données "validation.jsonl" de la campagne Semeval 2023 task 5 : "clickbait spoiling", disponible à cette adresse :  https://zenodo.org/records/6362726#.YsbdSTVBzrk
 - [ ] Télécharger toutes les bibiliothèques nécessaires.
 
 ## sortie_cherche_spoilers.csv
